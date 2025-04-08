@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genie - Advanced Virtual Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjs@11/lib/browser/math.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/function-plot@1/dist/function-plot.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header-controls">
+            <button id="themeToggle"><i class="fas fa-moon"></i></button>
+            <button id="settingsBtn"><i class="fas fa-cog"></i></button>
+        </div>
+        <h1>GENIE!</h1>
+        <h2>YOUR PERSONAL ADVANCED VIRTUAL ASSISTANT</h2>
+    </div>  
+
+    <div class="chat-container" id="chatContainer"></div>
+
+    <div class="prompt-area">
+        <div class="command-history">
+            <button id="prevCmd"><i class="fas fa-arrow-up"></i></button>
+            <button id="nextCmd"><i class="fas fa-arrow-down"></i></button>
+        </div>
+        <div id="imagePreview" class="image-preview"></div>
+        <input type="text" class="prompt" id="userInput" placeholder="Ask Something....">
+        <label for="fileUpload" class="btn file-upload-btn">
+            <i class="fas fa-paperclip"></i>
+            <input type="file" id="fileUpload" accept="image/*" style="display: none;">
+        </label>
+        <button class="btn" id="voiceBtn"><i class="fas fa-microphone"></i></button>
+        <button class="btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+        <button id="confirmUpload" class="btn confirm-btn">
+            <i class="fas fa-check"></i>
+        </button>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Settings</h2>
+            <div class="setting-option">
+                <label for="voiceSelect">Voice:</label>
+                <select id="voiceSelect"></select>
+            </div>
+            <div class="setting-option">
+                <label for="languageSelect">Language:</label>
+                <select id="languageSelect">
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="hi">Hindi</option>
+                </select>
+            </div>
+            <div class="setting-option">
+                <label for="responseSpeed">Response Speed:</label>
+                <input type="range" id="responseSpeed" min="0.5" max="2" step="0.1" value="1">
+            </div>
+            <div class="setting-option">
+                <label for="hfApiKey">Hugging Face API Key:</label>
+                <input type="password" id="hfApiKey" placeholder="Enter your HF API key">
+            </div>
+            <div class="setting-option">
+                <label for="geminiApiKey">Gemini API Key:</label>
+                <input type="password" id="geminiApiKey" placeholder="Enter your Gemini API key">
+            </div>
+            <button id="clearHistory">Clear Conversation History</button>
+        </div>
+    </div>
+
+    <!-- Voice visual animation -->
+    <div class="voice-visual" id="voiceVisual">
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring delay"></div>
+        <i class="fas fa-microphone"></i>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
