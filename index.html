@@ -1,88 +1,640 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Genie - Advanced Virtual Assistant</title>
+    <title>Ginnie - AI Assistant</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        // Primary brand colors
+                        primary: {
+                            50: '#eefaff',
+                            100: '#dcf5ff',
+                            200: '#b3ecff',
+                            300: '#5ce1ff',
+                            400: '#00cfff',
+                            500: '#00b8ff', // Main primary color
+                            600: '#0090cc',
+                            700: '#006C99',
+                            800: '#005980',
+                            900: '#003D66',
+                        },
+                        // Secondary accent colors
+                        accent: {
+                            50: '#fff0fb',
+                            100: '#ffe5f9',
+                            200: '#ffcbf5',
+                            300: '#ff9ee8',
+                            400: '#ff6ad8',
+                            500: '#ff38bf', // Main accent color
+                            600: '#ee00a0',
+                            700: '#c6007f',
+                            800: '#a30069',
+                            900: '#850055',
+                        },
+                        // Neutral colors for dark mode
+                        darkNeutral: {
+                            50: '#f8fafc',
+                            100: '#f0f5fa',
+                            200: '#e1e8f0',
+                            300: '#cad5e0',
+                            400: '#8696a7',
+                            500: '#5f748c',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#080d1b',
+                        },
+                        // Neutral colors for light mode
+                        lightNeutral: {
+                            50: '#f8f8fc',
+                            100: '#f0f0f6',
+                            200: '#e4e4ed',
+                            300: '#d1d1e1',
+                            400: '#a0a0b8',
+                            500: '#71718f',
+                            600: '#555570',
+                            700: '#3b3b53',
+                            800: '#232339',
+                            900: '#16162a',
+                            950: '#0c0c16',
+                        },
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-gentle': 'bounce-gentle 3s infinite',
+                        'spin-slow': 'spin 6s linear infinite',
+                        'gradient-shift': 'gradient-shift 8s ease infinite',
+                        'glow': 'glow 2s infinite alternate',
+                        'wave': 'wave 2.5s infinite',
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                        'slide-down': 'slideDown 0.5s ease-out forwards',
+                        'slide-left': 'slideLeft 0.5s ease-out forwards',
+                        'slide-right': 'slideRight 0.5s ease-out forwards',
+                        'scale-in': 'scaleIn 0.3s ease-out forwards',
+                        'typing': 'typing 1.5s steps(40, end) infinite',
+                    },
+                    keyframes: {
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        'bounce-gentle': {
+                            '0%, 100%': { transform: 'translateY(-5%)' },
+                            '50%': { transform: 'translateY(0)' },
+                        },
+                        'gradient-shift': {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                            '100%': { backgroundPosition: '0% 50%' },
+                        },
+                        'glow': {
+                            '0%': { textShadow: '0 0 5px rgba(0, 184, 255, 0.5), 0 0 10px rgba(0, 184, 255, 0.3)' },
+                            '100%': { textShadow: '0 0 10px rgba(0, 184, 255, 0.8), 0 0 20px rgba(0, 184, 255, 0.5), 0 0 30px rgba(0, 184, 255, 0.3)' }
+                        },
+                        'wave': {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '10%': { transform: 'rotate(14deg)' },
+                            '20%': { transform: 'rotate(-8deg)' },
+                            '30%': { transform: 'rotate(14deg)' },
+                            '40%': { transform: 'rotate(-4deg)' },
+                            '50%': { transform: 'rotate(10deg)' },
+                            '60%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(0deg)' },
+                        },
+                        'fadeIn': {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        'slideUp': {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        'slideDown': {
+                            '0%': { transform: 'translateY(-20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        'slideLeft': {
+                            '0%': { transform: 'translateX(20px)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        'slideRight': {
+                            '0%': { transform: 'translateX(-20px)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        'scaleIn': {
+                            '0%': { transform: 'scale(0.9)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        },
+                        'typing': {
+                            '0%': { width: '0' },
+                            '50%': { width: '100%' },
+                            '55%': { width: '100%' },
+                            '100%': { width: '0' },
+                        },
+                    },
+                    fontFamily: {
+                        'display': ['"Space Grotesk"', 'sans-serif'],
+                        'body': ['"Inter"', 'sans-serif'],
+                        'mono': ['"Fira Code"', 'monospace'],
+                    },
+                    boxShadow: {
+                        'neu-light': '5px 5px 10px #d1d1e1, -5px -5px 10px #ffffff',
+                        'neu-dark': '5px 5px 10px #0c0c16, -5px -5px 10px #232339',
+                        'inner-neu-light': 'inset 3px 3px 6px #d1d1e1, inset -3px -3px 6px #ffffff',
+                        'inner-neu-dark': 'inset 3px 3px 6px #0c0c16, inset -3px -3px 6px #232339',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(0, 184, 255, 0.2);
+            border-radius: 10px;
+        }
+        
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 184, 255, 0.4);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 143, 198, 0.2);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 143, 198, 0.4);
+        }
+        
+        /* Chat bubble styles */
+        .chat-bubble-user {
+            border-bottom-right-radius: 0;
+        }
+        
+        .chat-bubble-ai {
+            border-bottom-left-radius: 0;
+        }
+        
+        /* Typing animation */
+        .typing-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 3px;
+            background-color: theme('colors.primary.500');
+            animation: blink 1.5s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+        
+        @keyframes blink {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+            30% { transform: translateY(-6px); opacity: 1; }
+        }
+        
+        /* Loading spinner */
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 184, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: theme('colors.primary.500');
+            animation: spin 1s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Voice animation */
+        .voice-wave {
+            display: inline-block;
+            width: 3px;
+            height: 15px;
+            margin: 0 1px;
+            background-color: theme('colors.primary.500');
+            animation: wave 1s infinite ease-in-out;
+            border-radius: 3px;
+        }
+        
+        .voice-wave:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+        
+        .voice-wave:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+        
+        .voice-wave:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+        
+        .voice-wave:nth-child(5) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
+            50% { transform: scaleY(1); opacity: 1; }
+        }
+        
+        /* Animation utilities */
+        .animation-delay-100 {
+            animation-delay: 0.1s;
+        }
+        
+        .animation-delay-200 {
+            animation-delay: 0.2s;
+        }
+        
+        .animation-delay-300 {
+            animation-delay: 0.3s;
+        }
+        
+        .animation-delay-500 {
+            animation-delay: 0.5s;
+        }
+        
+        .animation-delay-700 {
+            animation-delay: 0.7s;
+        }
+        
+        /* Neumorphic styles */
+        .neu-button-light {
+            box-shadow: 5px 5px 10px #d1d1e1, -5px -5px 10px #ffffff;
+        }
+        
+        .neu-button-light:active {
+            box-shadow: inset 3px 3px 6px #d1d1e1, inset -3px -3px 6px #ffffff;
+        }
+        
+        .neu-button-dark {
+            box-shadow: 5px 5px 10px #0c0c16, -5px -5px 10px #232339;
+        }
+        
+        .neu-button-dark:active {
+            box-shadow: inset 3px 3px 6px #0c0c16, inset -3px -3px 6px #232339;
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mathjs@11/lib/browser/math.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/function-plot@1/dist/function-plot.js"></script>
 </head>
-<body>
-    <div class="container">
-        <div class="header-controls">
-            <button id="themeToggle"><i class="fas fa-moon"></i></button>
-            <button id="settingsBtn"><i class="fas fa-cog"></i></button>
-        </div>
-        <h1>GENIE!</h1>
-        <h2>YOUR PERSONAL ADVANCED VIRTUAL ASSISTANT</h2>
-    </div>  
-
-    <div class="chat-container" id="chatContainer"></div>
-
-    <div class="prompt-area">
-        <div class="command-history">
-            <button id="prevCmd"><i class="fas fa-arrow-up"></i></button>
-            <button id="nextCmd"><i class="fas fa-arrow-down"></i></button>
-        </div>
-        <div id="imagePreview" class="image-preview"></div>
-        <input type="text" class="prompt" id="userInput" placeholder="Ask Something....">
-        <label for="fileUpload" class="btn file-upload-btn">
-            <i class="fas fa-paperclip"></i>
-            <input type="file" id="fileUpload" accept="image/*" style="display: none;">
-        </label>
-        <button class="btn" id="voiceBtn"><i class="fas fa-microphone"></i></button>
-        <button class="btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
-        <button id="confirmUpload" class="btn confirm-btn">
-            <i class="fas fa-check"></i>
-        </button>
+<body class="font-body transition-all duration-300 dark:bg-darkNeutral-900 dark:text-darkNeutral-100 bg-lightNeutral-50 text-lightNeutral-900">
+    <!-- Animated background elements -->
+    <div class="fixed inset-0 -z-10 overflow-hidden opacity-30 pointer-events-none">
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary-500/10 via-primary-800/5 to-accent-500/10 dark:from-primary-900/20 dark:via-darkNeutral-900 dark:to-accent-900/20 animate-gradient-shift"></div>
+        <div class="absolute -top-32 -left-32 w-72 h-72 rounded-full bg-primary-400/20 blur-3xl"></div>
+        <div class="absolute top-1/4 -right-32 w-80 h-80 rounded-full bg-accent-400/10 blur-3xl"></div>
+        <div class="absolute bottom-0 left-20 w-96 h-96 rounded-full bg-primary-600/10 blur-3xl"></div>
     </div>
-
+    
+    <!-- Main container -->
+    <div class="flex flex-col h-screen max-w-7xl mx-auto relative px-4 lg:px-6 py-4">
+        <!-- Header -->
+        <header class="flex items-center justify-between py-3 animate-slide-down">
+            <!-- Logo and title -->
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <img src="gennie.png" alt="Ginnie Logo" class="w-12 h-12 animate-float" />
+                    <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-darkNeutral-900 dark:border-darkNeutral-800"></div>
+                </div>
+                <div>
+                    <h1 class="font-display text-2xl font-bold bg-gradient-to-r from-primary-500 to-accent-500 dark:from-primary-400 dark:to-accent-400 text-transparent bg-clip-text">
+                        GINNIE
+                    </h1>
+                    <p class="text-xs text-lightNeutral-500 dark:text-darkNeutral-400">AI Virtual Assistant</p>
+                </div>
+            </div>
+            
+            <!-- Controls -->
+            <div class="flex items-center gap-2">
+                <button id="themeToggle" class="w-10 h-10 rounded-full flex items-center justify-center text-primary-600 dark:text-primary-400 hover:bg-primary-100/20 dark:hover:bg-primary-900/20 transition-all duration-300">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="settingsBtn" class="w-10 h-10 rounded-full flex items-center justify-center text-primary-600 dark:text-primary-400 hover:bg-primary-100/20 dark:hover:bg-primary-900/20 transition-all duration-300">
+                    <i class="fas fa-cog animate-spin-slow"></i>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Main content area -->
+        <div class="flex-1 flex flex-col md:flex-row gap-4 overflow-hidden">
+            <!-- Assistant panel - visible on medium screens and above -->
+            <div class="hidden md:flex flex-col w-64 p-4 bg-white/10 dark:bg-darkNeutral-800/30 backdrop-blur-sm rounded-2xl border border-primary-300/20 dark:border-primary-900/20 animate-slide-right">
+                <div class="flex flex-col items-center mb-6">
+                    <img src="gennie.png" alt="Ginnie Profile" class="w-28 h-28 rounded-full mb-3 border-2 border-primary-400 dark:border-primary-600 p-1" />
+                    <h2 class="font-display font-medium text-lg">Ginnie</h2>
+                    <p class="text-xs text-lightNeutral-500 dark:text-darkNeutral-400 mt-1">Advanced AI Assistant</p>
+                    <div class="flex items-center mt-2 px-3 py-1 rounded-full text-xs bg-green-500/20 text-green-700 dark:text-green-400">
+                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                        <span>Online</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-4 flex-1">
+                    <div>
+                        <h3 class="text-xs uppercase font-semibold text-lightNeutral-500 dark:text-darkNeutral-400 mb-2">Capabilities</h3>
+                        <ul class="text-sm space-y-2">
+                            <li class="flex items-center gap-2">
+                                <i class="fas fa-robot text-primary-500"></i>
+                                <span>Question Answering</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <i class="fas fa-image text-primary-500"></i>
+                                <span>Image Generation</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <i class="fas fa-calculator text-primary-500"></i>
+                                <span>Math Problem Solving</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <i class="fas fa-chart-line text-primary-500"></i>
+                                <span>Graph Plotting</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <i class="fas fa-language text-primary-500"></i>
+                                <span>Language Translation</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xs uppercase font-semibold text-lightNeutral-500 dark:text-darkNeutral-400 mb-2">Quick Actions</h3>
+                        <div class="space-y-2">
+                            <button class="w-full py-2 px-3 text-left text-sm rounded-lg transition-all duration-200 bg-lightNeutral-200/50 hover:bg-lightNeutral-200 dark:bg-darkNeutral-700/50 dark:hover:bg-darkNeutral-700 flex items-center gap-2">
+                                <i class="fas fa-clock text-primary-500"></i>
+                                <span>What time is it?</span>
+                            </button>
+                            <button class="w-full py-2 px-3 text-left text-sm rounded-lg transition-all duration-200 bg-lightNeutral-200/50 hover:bg-lightNeutral-200 dark:bg-darkNeutral-700/50 dark:hover:bg-darkNeutral-700 flex items-center gap-2">
+                                <i class="fas fa-calendar text-primary-500"></i>
+                                <span>What's today's date?</span>
+                            </button>
+                            <button class="w-full py-2 px-3 text-left text-sm rounded-lg transition-all duration-200 bg-lightNeutral-200/50 hover:bg-lightNeutral-200 dark:bg-darkNeutral-700/50 dark:hover:bg-darkNeutral-700 flex items-center gap-2">
+                                <i class="fas fa-image text-primary-500"></i>
+                                <span>Generate an image</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t border-lightNeutral-200 dark:border-darkNeutral-700">
+                    <p class="text-xs text-lightNeutral-500 dark:text-darkNeutral-400 text-center">Powered by Gemini AI</p>
+                </div>
+            </div>
+            
+            <!-- Chat area -->
+            <div class="flex-1 flex flex-col rounded-2xl border border-lightNeutral-200 dark:border-darkNeutral-700 overflow-hidden animate-scale-in">
+                <!-- Chat header -->
+                <div class="bg-lightNeutral-100 dark:bg-darkNeutral-800 border-b border-lightNeutral-200 dark:border-darkNeutral-700 py-3 px-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3 md:hidden">
+                        <img src="gennie.png" alt="Ginnie" class="w-8 h-8 rounded-full border border-primary-500" />
+                        <span class="font-medium">Ginnie</span>
+                    </div>
+                    <div class="flex items-center gap-2 md:gap-3">
+                        <span class="text-xs md:text-sm">Conversation</span>
+                        <span class="hidden md:inline-block w-2 h-2 rounded-full bg-primary-500"></span>
+                        <button id="clearHistoryBtn" class="text-xs px-2 py-1 rounded transition-colors text-red-500 hover:bg-red-500/10 flex items-center gap-1">
+                            <i class="fas fa-trash-alt"></i>
+                            <span class="hidden md:inline-block">Clear History</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Messages area -->
+                <div id="chatContainer" class="flex-1 overflow-y-auto p-4 bg-lightNeutral-50/80 dark:bg-darkNeutral-900/80 space-y-6"></div>
+                
+                <!-- Input area -->
+                <div class="p-3 bg-lightNeutral-100 dark:bg-darkNeutral-800 border-t border-lightNeutral-200 dark:border-darkNeutral-700">
+                    <div class="flex items-center gap-2 bg-white dark:bg-darkNeutral-700 rounded-xl p-2 shadow-sm dark:shadow-none border border-lightNeutral-200 dark:border-darkNeutral-600">
+                        <div class="command-history flex flex-col gap-1 px-1">
+                            <button id="prevCmd" class="w-7 h-7 rounded-full flex items-center justify-center text-lightNeutral-500 dark:text-darkNeutral-400 hover:bg-lightNeutral-200 dark:hover:bg-darkNeutral-600 transition-all duration-200">
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                            <button id="nextCmd" class="w-7 h-7 rounded-full flex items-center justify-center text-lightNeutral-500 dark:text-darkNeutral-400 hover:bg-lightNeutral-200 dark:hover:bg-darkNeutral-600 transition-all duration-200">
+                                <i class="fas fa-arrow-down"></i>
+                            </button>
+                        </div>
+                        
+                        <div id="imagePreview" class="image-preview hidden max-w-[60px] max-h-[40px] rounded-md overflow-hidden border border-primary-300 dark:border-primary-700"></div>
+                        
+                        <input 
+                            type="text" 
+                            id="userInput" 
+                            placeholder="Ask Ginnie something..." 
+                            class="flex-1 bg-transparent border-none outline-none text-lightNeutral-900 dark:text-white placeholder-lightNeutral-400 dark:placeholder-darkNeutral-400 py-2 px-3"
+                        >
+                        
+                        <div class="flex items-center gap-2">
+                            <label for="fileUpload" class="w-10 h-10 rounded-full flex items-center justify-center text-lightNeutral-500 dark:text-darkNeutral-400 hover:bg-lightNeutral-200 dark:hover:bg-darkNeutral-600 transition-all duration-200 cursor-pointer">
+                                <i class="fas fa-paperclip"></i>
+                                <input type="file" id="fileUpload" accept="image/*" class="hidden">
+                            </label>
+                            
+                            <button id="voiceBtn" class="w-10 h-10 rounded-full flex items-center justify-center text-lightNeutral-500 dark:text-darkNeutral-400 hover:bg-lightNeutral-200 dark:hover:bg-darkNeutral-600 transition-all duration-200">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            
+                            <button id="sendBtn" class="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 text-white hover:shadow-md transition-all duration-200">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                            
+                            <button id="confirmUpload" class="hidden w-10 h-10 rounded-full flex items-center justify-center bg-green-500 dark:bg-green-600 text-white hover:shadow-md transition-all duration-200">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-center mt-2 text-xs text-lightNeutral-400 dark:text-darkNeutral-500">
+                        <span>Press Enter to send • Press M to use voice • Shift+Enter for new line</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Settings Modal -->
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Settings</h2>
-            <div class="setting-option">
-                <label for="voiceSelect">Voice:</label>
-                <select id="voiceSelect"></select>
+    <div id="settingsModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center">
+        <div class="modal-content w-11/12 max-w-lg bg-white dark:bg-darkNeutral-800 rounded-2xl shadow-xl overflow-hidden transition-all duration-300 opacity-0 scale-95">
+            <!-- Modal header -->
+            <div class="bg-gradient-to-r from-primary-500 to-accent-500 py-4 px-6 text-white flex items-center justify-between">
+                <h2 class="text-xl font-display font-semibold">Settings</h2>
+                <button class="close text-white/80 hover:text-white transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="setting-option">
-                <label for="languageSelect">Language:</label>
-                <select id="languageSelect">
-                    <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
-                    <option value="de">German</option>
-                    <option value="hi">Hindi</option>
-                </select>
+            
+            <!-- Tabs -->
+            <div class="flex border-b border-lightNeutral-200 dark:border-darkNeutral-700">
+                <button class="settings-tab active py-3 px-4 font-medium text-primary-500 border-b-2 border-primary-500" data-tab="general">
+                    <i class="fas fa-sliders-h mr-2"></i>General
+                </button>
+                <button class="settings-tab py-3 px-4 font-medium text-lightNeutral-500 dark:text-darkNeutral-400 border-b-2 border-transparent" data-tab="voice">
+                    <i class="fas fa-volume-up mr-2"></i>Voice
+                </button>
+                <button class="settings-tab py-3 px-4 font-medium text-lightNeutral-500 dark:text-darkNeutral-400 border-b-2 border-transparent" data-tab="api">
+                    <i class="fas fa-key mr-2"></i>API Keys
+                </button>
             </div>
-            <div class="setting-option">
-                <label for="responseSpeed">Response Speed:</label>
-                <input type="range" id="responseSpeed" min="0.5" max="2" step="0.1" value="1">
+            
+            <!-- Tab content -->
+            <div class="p-6 max-h-[60vh] overflow-y-auto">
+                <!-- General tab -->
+                <div id="general-tab" class="settings-content block">
+                    <div class="space-y-6">
+                        <div class="setting-option">
+                            <label class="flex items-center justify-between mb-2">
+                                <span class="font-medium">Theme</span>
+                                <div class="relative inline-block w-12 h-6 rounded-full bg-lightNeutral-200 dark:bg-darkNeutral-700">
+                                    <input type="checkbox" id="themeSwitch" class="peer sr-only">
+                                    <span class="absolute inset-1 bg-white dark:bg-primary-500 rounded-full w-4 h-4 transition-all peer-checked:translate-x-6"></span>
+                                </div>
+                            </label>
+                            <p class="text-sm text-lightNeutral-500 dark:text-darkNeutral-400">
+                                Switch between light and dark mode.
+                            </p>
+                        </div>
+                        
+                        <div class="setting-option">
+                            <label for="languageSelect" class="font-medium block mb-2">Language:</label>
+                            <select id="languageSelect" class="w-full bg-lightNeutral-100 dark:bg-darkNeutral-700 border border-lightNeutral-300 dark:border-darkNeutral-600 rounded-lg p-2 text-lightNeutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <option value="en">English</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                                <option value="hi">Hindi</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-option">
+                            <button id="clearHistory" class="w-full py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-trash-alt"></i>
+                                Clear Conversation History
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Voice tab -->
+                <div id="voice-tab" class="settings-content hidden">
+                    <div class="space-y-6">
+                        <div class="setting-option">
+                            <label for="voiceSelect" class="font-medium block mb-2">Voice:</label>
+                            <select id="voiceSelect" class="w-full bg-lightNeutral-100 dark:bg-darkNeutral-700 border border-lightNeutral-300 dark:border-darkNeutral-600 rounded-lg p-2 text-lightNeutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"></select>
+                        </div>
+                        
+                        <div class="setting-option">
+                            <label for="responseSpeed" class="font-medium block mb-2">Response Speed: <span id="speedValue">1.0</span>x</label>
+                            <input type="range" id="responseSpeed" min="0.5" max="2" step="0.1" value="1" class="w-full accent-primary-500">
+                            <div class="flex justify-between text-xs text-lightNeutral-500 dark:text-darkNeutral-400 mt-1">
+                                <span>Slower</span>
+                                <span>Faster</span>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-option">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="font-medium">Auto Text-to-Speech</label>
+                                <div class="relative inline-block w-12 h-6 rounded-full bg-lightNeutral-200 dark:bg-darkNeutral-700">
+                                    <input type="checkbox" id="ttsSwitch" class="peer sr-only" checked>
+                                    <span class="absolute inset-1 bg-primary-500 rounded-full w-4 h-4 transition-all peer-checked:translate-x-6"></span>
+                                </div>
+                            </div>
+                            <p class="text-sm text-lightNeutral-500 dark:text-darkNeutral-400">
+                                Automatically speak responses out loud.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- API Keys tab -->
+                <div id="api-tab" class="settings-content hidden">
+                    <div class="space-y-6">
+                        <div class="setting-option">
+                            <label for="geminiApiKey" class="font-medium block mb-2">Gemini API Key:</label>
+                            <div class="relative">
+                                <input type="password" id="geminiApiKey" placeholder="Enter your Gemini API key" class="w-full bg-lightNeutral-100 dark:bg-darkNeutral-700 border border-lightNeutral-300 dark:border-darkNeutral-600 rounded-lg p-2 pr-10 text-lightNeutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <button class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-lightNeutral-500 dark:text-darkNeutral-400">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <p class="text-xs text-lightNeutral-500 dark:text-darkNeutral-400 mt-1">
+                                Required for advanced AI features.
+                            </p>
+                        </div>
+                        
+                        <div class="setting-option">
+                            <label for="hfApiKey" class="font-medium block mb-2">Hugging Face API Key:</label>
+                            <div class="relative">
+                                <input type="password" id="hfApiKey" placeholder="Enter your HF API key" class="w-full bg-lightNeutral-100 dark:bg-darkNeutral-700 border border-lightNeutral-300 dark:border-darkNeutral-600 rounded-lg p-2 pr-10 text-lightNeutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <button class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-lightNeutral-500 dark:text-darkNeutral-400">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <p class="text-xs text-lightNeutral-500 dark:text-darkNeutral-400 mt-1">
+                                Required for image generation.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="setting-option">
-                <label for="hfApiKey">Hugging Face API Key:</label>
-                <input type="password" id="hfApiKey" placeholder="Enter your HF API key">
+            
+            <!-- Modal footer -->
+            <div class="py-3 px-6 bg-lightNeutral-100 dark:bg-darkNeutral-900/50 flex justify-end space-x-3 border-t border-lightNeutral-200 dark:border-darkNeutral-700">
+                <button class="py-2 px-4 rounded-lg border border-lightNeutral-300 dark:border-darkNeutral-600 text-lightNeutral-700 dark:text-darkNeutral-300 hover:bg-lightNeutral-200 dark:hover:bg-darkNeutral-700 transition-colors close">
+                    Cancel
+                </button>
+                <button id="saveSettings" class="py-2 px-4 rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors">
+                    Save Changes
+                </button>
             </div>
-            <div class="setting-option">
-                <label for="geminiApiKey">Gemini API Key:</label>
-                <input type="password" id="geminiApiKey" placeholder="Enter your Gemini API key">
-            </div>
-            <button id="clearHistory">Clear Conversation History</button>
         </div>
     </div>
-
-    <!-- Voice visual animation -->
-    <div class="voice-visual" id="voiceVisual">
-        <div class="pulse-ring"></div>
-        <div class="pulse-ring delay"></div>
-        <i class="fas fa-microphone"></i>
+    
+    <!-- Voice visualization -->
+    <div id="voiceVisual" class="fixed inset-0 z-40 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+        <div class="bg-black/40 dark:bg-black/60 backdrop-blur-md p-6 rounded-full shadow-lg">
+            <div class="flex items-center justify-center space-x-1 h-16">
+                <div class="voice-wave"></div>
+                <div class="voice-wave"></div>
+                <div class="voice-wave"></div>
+                <div class="voice-wave"></div>
+                <div class="voice-wave"></div>
+            </div>
+        </div>
     </div>
-
+    
     <script src="script.js"></script>
 </body>
 </html>

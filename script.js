@@ -1,17 +1,22 @@
-// DOM Elements
+// DOM Elements - Main UI
 const userInput = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
 const voiceBtn = document.getElementById("voiceBtn");
 const chatContainer = document.getElementById("chatContainer");
 const voiceVisual = document.getElementById("voiceVisual");
 const themeToggle = document.getElementById("themeToggle");
+const themeSwitch = document.getElementById("themeSwitch");
 const settingsBtn = document.getElementById("settingsBtn");
 const settingsModal = document.getElementById("settingsModal");
-const closeModal = document.querySelector(".close");
+const closeModalBtns = document.querySelectorAll(".close");
+const saveSettingsBtn = document.getElementById("saveSettings");
 const voiceSelect = document.getElementById("voiceSelect");
 const languageSelect = document.getElementById("languageSelect");
 const responseSpeed = document.getElementById("responseSpeed");
+const speedValue = document.getElementById("speedValue");
+const ttsSwitch = document.getElementById("ttsSwitch");
 const clearHistory = document.getElementById("clearHistory");
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 const prevCmd = document.getElementById("prevCmd");
 const nextCmd = document.getElementById("nextCmd");
 const fileUpload = document.getElementById("fileUpload");
@@ -19,6 +24,10 @@ const hfApiKeyInput = document.getElementById("hfApiKey");
 const geminiApiKeyInput = document.getElementById("geminiApiKey");
 const imagePreview = document.getElementById("imagePreview");
 const confirmUpload = document.getElementById("confirmUpload");
+const settingsTabs = document.querySelectorAll(".settings-tab");
+const settingsContents = document.querySelectorAll(".settings-content");
+const togglePasswordBtns = document.querySelectorAll(".toggle-password");
+const quickActionBtns = document.querySelectorAll(".quick-actions button");
 
 // Speech recognition setup
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -37,6 +46,7 @@ let currentTheme = 'dark';
 let voices = [];
 let selectedVoice = null;
 let selectedLanguage = 'en';
+let autoTTS = true;
 let hfApiKey = "";
 let geminiApiKey = "";
 let hfApiUrl = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
@@ -49,24 +59,60 @@ function init() {
     loadSettings();
     setupEventListeners();
     loadVoices();
-    speak("Genie is ready to assist you. How can I help you today?");
+    
+    // Only speak welcome message if autoTTS is enabled
+    if (autoTTS) {
+        speak("Ginnie is ready to assist you. How can I help you today?");
+    }
+    
     addWelcomeMessage();
+    
+    // Update speed value display
+    updateSpeedValueDisplay();
+    
+    // Set initial theme switch state
+    themeSwitch.checked = currentTheme === 'dark';
 }
 
 // Add welcome message
 function addWelcomeMessage() {
-    const welcomeMessage = `Hello! I'm Genie, your advanced virtual assistant. I can help you with:
-- Answering questions (powered by Gemini AI)
-- Opening websites (Google, YouTube, etc.)
-- Telling time, date, and day
-- Setting reminders
-- Translating languages
-- Generating images (try "generate an image of...")
-- Solving math problems from images
-- Plotting graphs of equations
-- And much more!
-
-Try saying "Hello" or ask me anything.`;
+    const welcomeMessage = `
+    <div class="space-y-3">
+        <div class="flex items-center gap-2">
+            <span class="inline-block w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center">
+                <i class="fas fa-hand-sparkles"></i>
+            </span>
+            <h3 class="text-lg font-medium text-primary-500 dark:text-primary-400">Welcome to Ginnie!</h3>
+        </div>
+        <p>I'm your advanced AI assistant. Here are some things I can help you with:</p>
+        <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 my-3">
+            <li class="flex items-center gap-2 text-sm">
+                <i class="fas fa-circle-question text-primary-400 w-5 text-center"></i>
+                <span>Answer general questions</span>
+            </li>
+            <li class="flex items-center gap-2 text-sm">
+                <i class="fas fa-image text-primary-400 w-5 text-center"></i>
+                <span>Generate images</span>
+            </li>
+            <li class="flex items-center gap-2 text-sm">
+                <i class="fas fa-calculator text-primary-400 w-5 text-center"></i>
+                <span>Solve math problems</span>
+            </li>
+            <li class="flex items-center gap-2 text-sm">
+                <i class="fas fa-chart-line text-primary-400 w-5 text-center"></i>
+                <span>Plot graphs of equations</span>
+            </li>
+            <li class="flex items-center gap-2 text-sm">
+                <i class="fas fa-clock text-primary-400 w-5 text-center"></i>
+                <span>Tell time and date</span>
+            </li>
+            <li class="flex items-center gap-2 text-sm">
+                <i class="fas fa-language text-primary-400 w-5 text-center"></i>
+                <span>Translate languages</span>
+            </li>
+        </ul>
+        <p class="text-sm italic">Try asking me something, or click one of the quick actions in the sidebar.</p>
+    </div>`;
     
     const welcomeBox = createChatBox(welcomeMessage, "ai-chat-box");
     chatContainer.appendChild(welcomeBox);
@@ -84,14 +130,48 @@ function setupEventListeners() {
     sendBtn.addEventListener("click", handleSendClick);
     userInput.addEventListener("keydown", handleInputKeydown);
 
-    // Theme toggle
+    // Theme toggle - both header button and settings switch
     themeToggle.addEventListener("click", toggleTheme);
+    themeSwitch.addEventListener("change", (e) => {
+        currentTheme = e.target.checked ? 'dark' : 'light';
+        applyTheme();
+        saveSettings();
+    });
 
     // Settings modal
-    settingsBtn.addEventListener("click", () => settingsModal.style.display = "flex");
-    closeModal.addEventListener("click", () => settingsModal.style.display = "none");
+    settingsBtn.addEventListener("click", openSettingsModal);
+    closeModalBtns.forEach(btn => {
+        btn.addEventListener("click", closeSettingsModal);
+    });
+    
     window.addEventListener("click", (e) => {
-        if (e.target === settingsModal) settingsModal.style.display = "none";
+        if (e.target === settingsModal) closeSettingsModal();
+    });
+
+    // Settings tabs
+    settingsTabs.forEach(tab => {
+        tab.addEventListener("click", (e) => {
+            const tabId = e.currentTarget.getAttribute("data-tab");
+            switchSettingsTab(tabId);
+        });
+    });
+    
+    // Toggle password visibility
+    togglePasswordBtns.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const input = e.currentTarget.previousElementSibling;
+            const icon = e.currentTarget.querySelector("i");
+            
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        });
     });
 
     // Voice selection
@@ -108,17 +188,36 @@ function setupEventListeners() {
     });
 
     // Response speed
-    responseSpeed.addEventListener("input", saveSettings);
-
-    // Clear history
-    clearHistory.addEventListener("click", () => {
-        chatContainer.innerHTML = '';
-        commandHistory = [];
-        currentHistoryIndex = -1;
-        addWelcomeMessage();
-        speak("Conversation history cleared.");
+    responseSpeed.addEventListener("input", (e) => {
+        updateSpeedValueDisplay();
         saveSettings();
     });
+    
+    // TTS toggle
+    ttsSwitch.addEventListener("change", (e) => {
+        autoTTS = e.target.checked;
+        saveSettings();
+    });
+
+    // Clear history - both button locations
+    clearHistory.addEventListener("click", () => {
+        confirmClearHistory();
+    });
+    
+    clearHistoryBtn.addEventListener("click", () => {
+        confirmClearHistory();
+    });
+
+    // Quick action buttons
+    if (quickActionBtns) {
+        quickActionBtns.forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const action = e.currentTarget.textContent.trim();
+                userInput.value = action;
+                handleSendClick();
+            });
+        });
+    }
 
     // Command history navigation
     prevCmd.addEventListener("click", navigateHistoryUp);
@@ -139,8 +238,157 @@ function setupEventListeners() {
         saveSettings();
     });
 
+    // Save settings button
+    saveSettingsBtn.addEventListener("click", () => {
+        saveSettings();
+        closeSettingsModal();
+        
+        // Show success toast
+        showToast("Settings saved successfully", "success");
+    });
+
     // When voices are loaded
     speechSynthesis.onvoiceschanged = loadVoices;
+    
+    // Add keyboard shortcut for voice toggle (press 'M' key)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'm' && document.activeElement !== userInput) {
+            toggleVoiceRecognition();
+        }
+    });
+}
+
+// Update speed value display
+function updateSpeedValueDisplay() {
+    if (speedValue) {
+        speedValue.textContent = parseFloat(responseSpeed.value).toFixed(1);
+    }
+}
+
+// Show toast message
+function showToast(message, type = "info") {
+    // Create toast element
+    const toast = document.createElement("div");
+    
+    let bgColor = "bg-primary-500";
+    let icon = "fa-info-circle";
+    
+    if (type === "success") {
+        bgColor = "bg-green-500";
+        icon = "fa-check-circle";
+    } else if (type === "error") {
+        bgColor = "bg-red-500";
+        icon = "fa-exclamation-circle";
+    } else if (type === "warning") {
+        bgColor = "bg-yellow-500";
+        icon = "fa-exclamation-triangle";
+    }
+    
+    toast.className = `fixed bottom-4 right-4 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-slide-up z-50`;
+    toast.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(20px)";
+        toast.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+        
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+// Apply current theme
+function applyTheme() {
+    if (currentTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        if (themeSwitch) {
+            themeSwitch.checked = true;
+        }
+    } else {
+        document.documentElement.classList.remove('dark');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        if (themeSwitch) {
+            themeSwitch.checked = false;
+        }
+    }
+}
+
+// Toggle theme
+function toggleTheme() {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme();
+    saveSettings();
+}
+
+// Switch settings tab
+function switchSettingsTab(tabId) {
+    // Update tab buttons
+    settingsTabs.forEach(tab => {
+        if (tab.getAttribute("data-tab") === tabId) {
+            tab.classList.add("text-primary-500", "border-primary-500");
+            tab.classList.remove("text-lightNeutral-500", "dark:text-darkNeutral-400", "border-transparent");
+        } else {
+            tab.classList.remove("text-primary-500", "border-primary-500");
+            tab.classList.add("text-lightNeutral-500", "dark:text-darkNeutral-400", "border-transparent");
+        }
+    });
+    
+    // Update tab contents
+    settingsContents.forEach(content => {
+        if (content.id === `${tabId}-tab`) {
+            content.classList.remove("hidden");
+            content.classList.add("block");
+        } else {
+            content.classList.remove("block");
+            content.classList.add("hidden");
+        }
+    });
+}
+
+// Confirm clear history
+function confirmClearHistory() {
+    if (confirm("Are you sure you want to clear your conversation history?")) {
+        chatContainer.innerHTML = '';
+        commandHistory = [];
+        currentHistoryIndex = -1;
+        addWelcomeMessage();
+        
+        if (autoTTS) {
+            speak("Conversation history cleared.");
+        }
+        
+        saveSettings();
+        showToast("Conversation history cleared", "success");
+    }
+}
+
+// Open settings modal
+function openSettingsModal() {
+    settingsModal.style.display = "flex";
+    setTimeout(() => {
+        const modalContent = settingsModal.querySelector('.modal-content');
+        modalContent.style.opacity = '1';
+        modalContent.style.transform = 'scale(1)';
+    }, 10);
+}
+
+// Close settings modal
+function closeSettingsModal() {
+    const modalContent = settingsModal.querySelector('.modal-content');
+    modalContent.style.opacity = '0';
+    modalContent.style.transform = 'scale(0.95)';
+    
+    setTimeout(() => {
+        settingsModal.style.display = "none";
+    }, 300);
 }
 
 // Handle send button click
@@ -155,7 +403,8 @@ function handleSendClick() {
 
 // Handle Enter key press
 function handleInputKeydown(e) {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
         handleSendClick();
     }
 }
@@ -173,8 +422,23 @@ function addUserMessage(message) {
 
 // Process user input and generate response
 function processUserInput(input) {
-    // Show typing indicator
-    const typingIndicator = createChatBox("<span class='loading-spinner'></span>", "ai-chat-box");
+    // Show typing indicator with animated dots
+    const typingIndicator = createChatBox(
+        `<div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center">
+                <span class="loading-spinner"></span>
+            </div>
+            <div>
+                <div class="flex items-center gap-1">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
+                <div class="text-xs text-lightNeutral-500 dark:text-darkNeutral-400 mt-1">Ginnie is thinking...</div>
+            </div>
+        </div>`, 
+        "ai-chat-box"
+    );
     typingIndicator.id = "typingIndicator";
     chatContainer.appendChild(typingIndicator);
     chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -215,7 +479,29 @@ function processUserInput(input) {
         const indicator = document.getElementById("typingIndicator");
         if (indicator) chatContainer.removeChild(indicator);
         
-        respond("Please enter your Gemini API key in settings for advanced responses.");
+        respond(`
+            <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-yellow-700 dark:text-yellow-400">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span class="font-medium">API Key Required</span>
+                </div>
+                <p>Please enter your Gemini API key in settings to enable advanced AI responses.</p>
+                <button id="openApiSettings" class="mt-2 px-3 py-1 bg-yellow-500/20 hover:bg-yellow-500/30 rounded text-sm transition-colors">
+                    Open Settings
+                </button>
+            </div>
+        `);
+        
+        // Add event listener to the button
+        setTimeout(() => {
+            const openApiBtn = document.getElementById("openApiSettings");
+            if (openApiBtn) {
+                openApiBtn.addEventListener("click", () => {
+                    openSettingsModal();
+                    switchSettingsTab("api");
+                });
+            }
+        }, 100);
     }
 }
 
@@ -345,11 +631,11 @@ async function generateImage(prompt) {
         
         const imgElement = document.createElement("img");
         imgElement.src = imageUrl;
-        imgElement.style.maxWidth = "100%";
+        imgElement.className = "max-w-full rounded-lg mt-3 border border-primary/30";
         
         const container = document.createElement("div");
         container.classList.add("ai-chat-box");
-        container.innerHTML = `<p>Generated image for: "${prompt}"</p>`;
+        container.innerHTML = `<p class="mb-2 text-primary font-medium">Generated image for: "${prompt}"</p>`;
         container.appendChild(imgElement);
         
         chatContainer.appendChild(container);
@@ -360,7 +646,7 @@ async function generateImage(prompt) {
     }
 }
 
-// Handle file upload
+// Handle file upload with enhanced preview
 function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -370,14 +656,14 @@ function handleFileUpload(event) {
 
     // Show preview
     const imageUrl = URL.createObjectURL(file);
-    imagePreview.innerHTML = `<img src="${imageUrl}" alt="Preview">`;
-    imagePreview.style.display = 'block';
+    imagePreview.innerHTML = `<img src="${imageUrl}" alt="Preview" class="w-full h-full object-cover">`;
+    imagePreview.classList.remove('hidden');
     
     // Store file for later processing
     pendingUpload = file;
     
     // Show confirm button and update placeholder
-    confirmUpload.style.display = 'flex';
+    confirmUpload.classList.remove('hidden');
     userInput.placeholder = "Add a prompt (optional)...";
 }
 
@@ -395,18 +681,18 @@ function confirmImageUpload() {
     resetUploadUI();
 }
 
-// Reset upload UI elements
+// Reset upload UI elements with improved styling
 function resetUploadUI() {
-    imagePreview.style.display = 'none';
+    imagePreview.classList.add('hidden');
     imagePreview.innerHTML = '';
-    confirmUpload.style.display = 'none';
+    confirmUpload.classList.add('hidden');
     userInput.value = '';
-    userInput.placeholder = "Ask Something....";
+    userInput.placeholder = "Ask Ginnie something...";
     pendingUpload = null;
     fileUpload.value = '';
 }
 
-// Process uploaded image
+// Process uploaded image with improved UI feedback
 async function processImageUpload(file, promptText = '') {
     if (isProcessingImage) {
         respond("Please wait while I process the current image.");
@@ -415,8 +701,19 @@ async function processImageUpload(file, promptText = '') {
 
     isProcessingImage = true;
     
-    // Show processing indicator
-    const processingIndicator = createChatBox("Processing image... <span class='loading-spinner'></span>", "ai-chat-box");
+    // Show processing indicator with animated dots
+    const processingIndicator = createChatBox(
+        `<div class='flex items-center gap-3'>
+            <span class='loading-spinner'></span>
+            <div>
+                <span>Processing image</span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            </div>
+        </div>`, 
+        "ai-chat-box"
+    );
     processingIndicator.id = "processingIndicator";
     chatContainer.appendChild(processingIndicator);
     chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -426,12 +723,11 @@ async function processImageUpload(file, promptText = '') {
         const imageUrl = URL.createObjectURL(file);
         const imgPreview = document.createElement("img");
         imgPreview.src = imageUrl;
-        imgPreview.style.maxWidth = "60%";
-        imgPreview.style.borderRadius = "10px";
+        imgPreview.className = "max-w-[60%] rounded-lg mt-3 border border-accent/20";
         
         const previewContainer = document.createElement("div");
         previewContainer.classList.add("ai-chat-box");
-        previewContainer.innerHTML = `<div class="image-prompt">Uploaded image${promptText ? ` (${promptText})` : ''}:</div>`;
+        previewContainer.innerHTML = `<div class="text-primary font-medium">Uploaded image${promptText ? ` (${promptText})` : ''}:</div>`;
         previewContainer.appendChild(imgPreview);
         chatContainer.appendChild(previewContainer);
 
@@ -459,8 +755,8 @@ async function processImageUpload(file, promptText = '') {
                 const resultContainer = document.createElement("div");
                 resultContainer.classList.add("ai-chat-box");
                 resultContainer.innerHTML = `
-                    <div class="image-prompt">Extracted text:</div>
-                    <div class="ocr-text">${cleanedText}</div>
+                    <div class="text-primary font-medium mb-2">Extracted text:</div>
+                    <div class="p-3 bg-gray-800/50 rounded-lg border border-gray-700 text-sm font-mono">${cleanedText}</div>
                 `;
                 chatContainer.appendChild(resultContainer);
             }
@@ -489,9 +785,9 @@ function processExtractedText(text, filename) {
         const mathContainer = document.createElement("div");
         mathContainer.classList.add("ai-chat-box");
         mathContainer.innerHTML = `
-            <div class="image-prompt">Found ${mathEquations.length} math equation(s):</div>
-            <div class="math-tabs" id="mathTabs"></div>
-            <div class="math-content-container" id="mathContent"></div>
+            <div class="text-primary font-medium mb-3">Found ${mathEquations.length} math equation(s):</div>
+            <div class="flex gap-2 overflow-x-auto pb-2 mb-2" id="mathTabs"></div>
+            <div class="border border-gray-700 rounded-lg p-3 bg-gray-800/30" id="mathContent"></div>
         `;
         
         const tabsContainer = mathContainer.querySelector("#mathTabs");
@@ -501,8 +797,16 @@ function processExtractedText(text, filename) {
             try {
                 // Create tab
                 const tab = document.createElement("div");
-                tab.classList.add("math-tab");
-                if (index === 0) tab.classList.add("active");
+                tab.classList.add(
+                    "math-tab", 
+                    "px-3", "py-1", "rounded-full", "text-sm", "cursor-pointer", 
+                    "transition-colors", "border", "border-gray-700"
+                );
+                if (index === 0) {
+                    tab.classList.add("bg-primary", "text-dark", "font-medium");
+                } else {
+                    tab.classList.add("bg-gray-800", "hover:bg-gray-700");
+                }
                 tab.textContent = `Eq ${index + 1}`;
                 tab.onclick = () => switchMathTab(index);
                 tabsContainer.appendChild(tab);
@@ -510,7 +814,8 @@ function processExtractedText(text, filename) {
                 // Create content
                 const content = document.createElement("div");
                 content.classList.add("math-content");
-                if (index === 0) content.classList.add("active");
+                if (index === 0) content.classList.add("block");
+                else content.classList.add("hidden");
                 content.id = `mathContent-${index}`;
                 
                 // Clean and prepare equation
@@ -518,8 +823,8 @@ function processExtractedText(text, filename) {
                 const solution = math.evaluate(cleanEq);
                 
                 content.innerHTML = `
-                    <div class="equation">${cleanEq} = ${solution}</div>
-                    ${canPlotGraph(cleanEq) ? '<div class="graph-container"></div>' : ''}
+                    <div class="equation mb-3 text-lg"><span class="text-primary">${cleanEq}</span> = <span class="text-secondary">${solution}</span></div>
+                    ${canPlotGraph(cleanEq) ? '<div class="graph-container mt-4 rounded-lg overflow-hidden border border-gray-700"></div>' : ''}
                 `;
                 contentContainer.appendChild(content);
                 
@@ -538,8 +843,8 @@ function processExtractedText(text, filename) {
                 const errorContent = document.createElement("div");
                 errorContent.classList.add("math-content");
                 errorContent.innerHTML = `
-                    <div class="equation">${eq}</div>
-                    <div class="error">Could not solve this equation</div>
+                    <div class="equation text-lg"><span class="text-primary">${eq}</span></div>
+                    <div class="error text-red-500 mt-2">Could not solve this equation</div>
                 `;
                 contentContainer.appendChild(errorContent);
             }
@@ -568,17 +873,21 @@ function cleanEquation(equation) {
 function switchMathTab(index) {
     document.querySelectorAll('.math-tab').forEach((tab, i) => {
         if (i === index) {
-            tab.classList.add('active');
+            tab.classList.remove('bg-gray-800', 'hover:bg-gray-700');
+            tab.classList.add('bg-primary', 'text-dark', 'font-medium');
         } else {
-            tab.classList.remove('active');
+            tab.classList.remove('bg-primary', 'text-dark', 'font-medium');
+            tab.classList.add('bg-gray-800', 'hover:bg-gray-700');
         }
     });
     
     document.querySelectorAll('.math-content').forEach((content, i) => {
         if (i === index) {
-            content.classList.add('active');
+            content.classList.remove('hidden');
+            content.classList.add('block');
         } else {
-            content.classList.remove('active');
+            content.classList.remove('block');
+            content.classList.add('hidden');
         }
     });
 }
@@ -692,8 +1001,8 @@ function plotEquationGraph(equation) {
         const graphContainer = document.createElement("div");
         graphContainer.classList.add("ai-chat-box");
         graphContainer.innerHTML = `
-            <div class="image-prompt">Graph of: ${equation}</div>
-            <div class="graph-container" id="graph-${Date.now()}"></div>
+            <div class="text-primary font-medium mb-2">Graph of: ${equation}</div>
+            <div class="graph-container h-64 w-full border border-gray-700 rounded-lg overflow-hidden bg-gray-800/30" id="graph-${Date.now()}"></div>
         `;
         chatContainer.appendChild(graphContainer);
         chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -736,8 +1045,8 @@ function plotEquationGraph(equation) {
             } catch (plotError) {
                 console.error('Function plot error:', plotError);
                 document.getElementById(containerId).innerHTML = `
-                    <div class="error">Could not plot graph: ${plotError.message}</div>
-                    <div>Attempted to plot: ${plotEquation}</div>
+                    <div class="p-3 text-red-500">Could not plot graph: ${plotError.message}</div>
+                    <div class="p-3 text-sm font-mono">Attempted to plot: ${plotEquation}</div>
                 `;
             }
         }, 100);
@@ -747,7 +1056,7 @@ function plotEquationGraph(equation) {
     }
 }
 
-// Toggle voice recognition
+// Toggle voice recognition with improved visualization
 function toggleVoiceRecognition() {
     if (isListening) {
         recognition.stop();
@@ -763,7 +1072,17 @@ function toggleVoiceRecognition() {
         }, 10);
     }
     isListening = !isListening;
-    voiceBtn.classList.toggle('active');
+    
+    // Update button style
+    if (isListening) {
+        voiceBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        voiceBtn.classList.add('text-accent-500');
+        voiceBtn.classList.add('animate-pulse');
+    } else {
+        voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        voiceBtn.classList.remove('text-accent-500');
+        voiceBtn.classList.remove('animate-pulse');
+    }
 }
 
 // Handle voice recognition result
@@ -783,7 +1102,7 @@ function handleVoiceResult(event) {
 // Handle voice recognition errors
 function handleVoiceError(event) {
     console.error('Voice recognition error', event.error);
-    voiceBtn.classList.remove('active');
+    voiceBtn.classList.remove('bg-accent');
     voiceVisual.style.opacity = '0';
     setTimeout(() => {
         voiceVisual.style.display = 'none';
@@ -801,11 +1120,39 @@ function handleVoiceEnd() {
     isFinalResult = false;
 }
 
-// Create chat box element
+// Create chat box element with enhanced styling
 function createChatBox(content, className) {
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const box = document.createElement("div");
-    box.className = className;
-    box.innerHTML = content;
+    
+    if (className === "user-chat-box") {
+        box.className = "flex flex-col items-end animate-slide-left";
+        box.innerHTML = `
+            <div class="flex items-end gap-2">
+                <div class="text-xs text-lightNeutral-500 dark:text-darkNeutral-400">${timestamp}</div>
+                <div class="max-w-[80%] p-4 rounded-xl chat-bubble-user text-lightNeutral-900 dark:text-white bg-primary-100 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700/50 shadow-sm">
+                    ${content}
+                </div>
+                <div class="w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        `;
+    } else {
+        box.className = "flex flex-col items-start animate-slide-right";
+        box.innerHTML = `
+            <div class="flex items-end gap-2">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 text-white flex items-center justify-center">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="max-w-[80%] p-4 rounded-xl chat-bubble-ai text-lightNeutral-900 dark:text-white bg-white dark:bg-darkNeutral-800/60 border border-lightNeutral-200 dark:border-darkNeutral-700 shadow-sm">
+                    ${content}
+                </div>
+                <div class="text-xs text-lightNeutral-500 dark:text-darkNeutral-400">${timestamp}</div>
+            </div>
+        `;
+    }
+    
     return box;
 }
 
@@ -814,12 +1161,21 @@ function respond(message) {
     const aiBox = createChatBox(message, "ai-chat-box");
     chatContainer.appendChild(aiBox);
     chatContainer.scrollTop = chatContainer.scrollHeight;
-    speak(message);
+    
+    // Only speak if autoTTS is enabled
+    if (autoTTS) {
+        // Convert HTML to plain text for speech
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = message;
+        const plainText = tempDiv.textContent || tempDiv.innerText || '';
+        
+        speak(plainText);
+    }
 }
 
 // Speak text using speech synthesis
 function speak(text) {
-    if (!selectedVoice) return;
+    if (!selectedVoice || !autoTTS) return;
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.voice = selectedVoice;
@@ -871,12 +1227,29 @@ function navigateHistoryDown() {
     }
 }
 
-// Toggle between light/dark theme
-function toggleTheme() {
-    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    themeToggle.innerHTML = currentTheme === 'dark' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-    saveSettings();
+// Load settings from localStorage
+function loadSettings() {
+    const savedSettings = localStorage.getItem('genieSettings');
+    if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        currentTheme = settings.theme || 'dark';
+        selectedLanguage = settings.language || 'en';
+        autoTTS = settings.autoTTS !== undefined ? settings.autoTTS : true;
+        responseSpeed.value = settings.responseSpeed || '1';
+        hfApiKey = settings.hfApiKey || '';
+        geminiApiKey = settings.geminiApiKey || '';
+        commandHistory = settings.commandHistory || [];
+        
+        // Apply settings to UI
+        languageSelect.value = selectedLanguage;
+        recognition.lang = selectedLanguage;
+        hfApiKeyInput.value = hfApiKey;
+        geminiApiKeyInput.value = geminiApiKey;
+        ttsSwitch.checked = autoTTS;
+        
+        // Apply theme
+        applyTheme();
+    }
 }
 
 // Save settings to localStorage
@@ -885,38 +1258,13 @@ function saveSettings() {
         theme: currentTheme,
         voice: selectedVoice ? selectedVoice.name : null,
         language: selectedLanguage,
+        autoTTS: autoTTS,
         responseSpeed: responseSpeed.value,
         hfApiKey: hfApiKey,
         geminiApiKey: geminiApiKey,
         commandHistory: commandHistory
     };
     localStorage.setItem('genieSettings', JSON.stringify(settings));
-}
-
-// Load settings from localStorage
-function loadSettings() {
-    const savedSettings = localStorage.getItem('genieSettings');
-    if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        currentTheme = settings.theme || 'dark';
-        selectedLanguage = settings.language || 'en';
-        responseSpeed.value = settings.responseSpeed || '1';
-        hfApiKey = settings.hfApiKey || '';
-        geminiApiKey = settings.geminiApiKey || '';
-        commandHistory = settings.commandHistory || [];
-        
-        // Apply theme
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        themeToggle.innerHTML = currentTheme === 'dark' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-        
-        // Apply language
-        languageSelect.value = selectedLanguage;
-        recognition.lang = selectedLanguage;
-        
-        // Apply API keys
-        hfApiKeyInput.value = hfApiKey;
-        geminiApiKeyInput.value = geminiApiKey;
-    }
 }
 
 // Initialize the app
